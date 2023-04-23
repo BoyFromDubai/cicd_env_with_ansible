@@ -1,9 +1,0 @@
----  
-  - name: Set serv as proxy
-    template:
-      src: "conf.j2"
-      dest: "{{ dest_path }}"
-    become: true
-    
-    notify:
-      - Restart nginx    
