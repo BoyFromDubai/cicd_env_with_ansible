@@ -1,0 +1,58 @@
+---
+- name: Add an apt key
+  become: true
+  apt_key:
+    url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+    state: present
+  retries: 10
+  delay: 2
+
+- name: Add jenkins repo
+  become: true
+  lineinfile:
+    path: /etc/apt/sources.list.d/jenkins.list
+    line: deb https://pkg.jenkins.io/debian-stable binary/
+    create: yes
+
+- name: Install jenkins
+  become: true
+  apt:
+    name: jenkins
+    state: latest
+    update_cache: yes
+
+- name: Start service jenkins, if not started
+  service:
+    name: jenkins
+    state: started
+
+- name: Install git
+  become: true
+  apt:
+    name: git
+    state: latest
+    update_cache: yes
+
+- name: Install Maven
+  become: true
+  get_url:
+    url: 'https://dlcdn.apache.org/maven/maven-3/{{ maven_version }}/binaries/apache-maven-{{ maven_version }}-bin.tar.gz'
+    dest: /tmp/
+  retries: 10
+  delay: 2
+
+- name: Decompress maven
+  become: true
+  unarchive:
+    src: '/tmp/apache-maven-{{ maven_version }}-bin.tar.gz'
+    dest: '/opt/'
+    remote_src: yes
+
+- name: Conf env vars
+  blockinfile:
+    path: "{{ os_env_file }}"
+    block: |
+      M2_HOME=/opt/apache-maven-{{ maven_version }}
+      PATH=$M2_HOME/bin:$PATH
+      JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+      export PATH

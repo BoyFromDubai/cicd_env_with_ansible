@@ -1,0 +1,17 @@
+events {
+	worker_connections 768;
+}
+
+http {
+    upstream web {
+        {% for host in groups['webservers'] %}
+        server {{ hostvars[host]['ansible_default_ipv4']['address'] }};
+        {% endfor %}
+    }
+
+    server {
+        location / {
+            proxy_pass http://web;
+        }
+    }
+}

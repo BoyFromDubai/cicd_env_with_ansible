@@ -1,0 +1,94 @@
+---
+# - name: Ensure group tomcat exists
+#   become: true
+#   group:
+#     name: '{{ user }}'
+#     state: present
+
+# - name: Add the user tomcat
+#   become: true
+#   ansible.builtin.user:
+#     name: '{{ user }}'
+#     create_home: yes 
+#     group: '{{ user }}'
+#     shell: /bin/false
+#     home: /opt/{{ user }}
+
+# - name: Install tomcat
+#   become: true
+#   get_url:
+#     url: 'https://dlcdn.apache.org/tomcat/tomcat-9/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz'
+#     dest: /tmp/
+#   retries: 10
+#   delay: 2
+
+# - name: Decompress tomcat
+#   become: true
+#   unarchive:
+#     src: '/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz'
+#     dest: '/tmp'
+#     remote_src: yes
+
+# - name: Move files
+#   become: true
+#   copy:
+#     src: '/tmp/apache-tomcat-{{ tomcat_version }}/'
+#     dest: '/opt/{{ user }}'
+#     owner: '{{ user }}'
+#     remote_src: yes
+#     group: '{{ user }}'
+#     directory_mode: yes
+  
+- name: Change conf permissions
+  become: true
+  ansible.builtin.file:
+    path: '/opt/{{ user }}/conf'
+    mode: g+x
+
+- name: Set serv as proxy
+  template:
+    src: "tomcat_service_conf.j2"
+    dest: /etc/systemd/system/tomcat.service
+  become: true
+
+- name: Start tomcat service
+  become: true
+  systemd:
+    state: started
+    daemon_reload: true
+    name: tomcat
+
+- name: Configure context in host-manager
+  become: true
+  copy:
+    src: "host_manager_context.xml"
+    dest: /opt/tomcat/webapps/host-manager/META-INF/context.xml
+
+  notify:
+    - Restart tomcat
+
+- name: Configure context in manager
+  become: true
+  copy:
+    src: "manager_context.xml"
+    dest: /opt/tomcat/webapps/manager/META-INF/context.xml
+
+  notify:
+    - Restart tomcat
+
+- name: Add users
+  become: true
+  blockinfile:
+    path: "/opt/tomcat/conf/tomcat-users.xml"
+    insertbefore: '</tomcat-users>'
+    block: |
+      <role rolename="manager-gui"/>
+      <role rolename="manager-script"/>
+      <role rolename="manager-jmx"/>
+      <role rolename="manager-status"/>
+      <user username="admin" password="admin" roles="manager-gui, manager-script, manager-jmx, manager-status"/>
+      <user username="deployer" password="deployer" roles="manager-script"/>
+      <user username="tomcat" password="s3cret" roles="manager-gui"/>  
+
+  notify:
+    - Restart tomcat

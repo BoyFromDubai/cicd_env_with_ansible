@@ -1,0 +1,12 @@
+---
+home: "/home/{{ ansible_user }}" 
+
+os_env_file: '{{ home }}/.profile'
+
+maven_version: 3.9.1
+
+os_env_vars:
+  - key: M2_HOME
+    value: "'/opt/apache-maven-3.6.3'"
+  - key: PATH
+    value: '"$M2_HOME/bin:$PATH"'
