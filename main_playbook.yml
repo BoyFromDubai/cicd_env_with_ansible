@@ -1,13 +1,13 @@
 ---
-# - name: Configure jenkins
-#   hosts: jenkins
-#   roles:
-#     - java_installation
-#     - set_jenkins
+- name: Configure jenkins
+  hosts: jenkins
+  roles:
+    - java_installation
+    - set_jenkins
 
 - name: Configure tomcat
   hosts: tomcat
   roles:
-    # - java_installation
+    - java_installation
     - set_tomcat
 

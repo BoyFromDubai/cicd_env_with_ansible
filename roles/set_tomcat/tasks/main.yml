@@ -1,43 +1,43 @@
 ---
-# - name: Ensure group tomcat exists
-#   become: true
-#   group:
-#     name: '{{ user }}'
-#     state: present
+- name: Ensure group tomcat exists
+  become: true
+  group:
+    name: '{{ user }}'
+    state: present
 
-# - name: Add the user tomcat
-#   become: true
-#   ansible.builtin.user:
-#     name: '{{ user }}'
-#     create_home: yes 
-#     group: '{{ user }}'
-#     shell: /bin/false
-#     home: /opt/{{ user }}
+- name: Add the user tomcat
+  become: true
+  ansible.builtin.user:
+    name: '{{ user }}'
+    create_home: yes 
+    group: '{{ user }}'
+    shell: /bin/false
+    home: /opt/{{ user }}
 
-# - name: Install tomcat
-#   become: true
-#   get_url:
-#     url: 'https://dlcdn.apache.org/tomcat/tomcat-9/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz'
-#     dest: /tmp/
-#   retries: 10
-#   delay: 2
+- name: Install tomcat
+  become: true
+  get_url:
+    url: 'https://dlcdn.apache.org/tomcat/tomcat-9/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz'
+    dest: /tmp/
+  retries: 10
+  delay: 2
 
-# - name: Decompress tomcat
-#   become: true
-#   unarchive:
-#     src: '/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz'
-#     dest: '/tmp'
-#     remote_src: yes
+- name: Decompress tomcat
+  become: true
+  unarchive:
+    src: '/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz'
+    dest: '/tmp'
+    remote_src: yes
 
-# - name: Move files
-#   become: true
-#   copy:
-#     src: '/tmp/apache-tomcat-{{ tomcat_version }}/'
-#     dest: '/opt/{{ user }}'
-#     owner: '{{ user }}'
-#     remote_src: yes
-#     group: '{{ user }}'
-#     directory_mode: yes
+- name: Move files
+  become: true
+  copy:
+    src: '/tmp/apache-tomcat-{{ tomcat_version }}/'
+    dest: '/opt/{{ user }}'
+    owner: '{{ user }}'
+    remote_src: yes
+    group: '{{ user }}'
+    directory_mode: yes
   
 - name: Change conf permissions
   become: true
